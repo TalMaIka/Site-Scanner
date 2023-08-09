@@ -1,61 +1,81 @@
+# Site Checker - A tool to gather information about a website.
+# Author: Tal.M
+# Date: August 5, 2023
+# Copyright © 2023 Tal.M. All rights reserved.
+
 import requests
 from bs4 import BeautifulSoup
-import tkinter as tk
-from tkinter import messagebox, ttk
+import time
+import requests
+from urllib.parse import urlparse
 import socket
-import threading
+import concurrent.futures
 
 
-def detect_cms(url):
-        response = requests.get(url)
-        if response.status_code == 200:
-            html = response.text
-            soup = BeautifulSoup(html, 'html.parser')
-
-            # Detect WordPress
-            if "Joomla" in html.lower():
-                return "WordPress"
-
-            # Detect Joomla
-            if soup.find("meta", {"name": "generator", "content": "Joomla! - Open Source Content Management"}):
-                return "Joomla"
-
-            # Detect Drupal
-            if soup.find("meta", {"name": "Generator", "content": "Drupal"}):
-                return "Drupal"
-
-            # Detect Wix
-            if "wix.com" in html:
-                return "Wix"
-
-            # Detect Squarespace
-            if "squarespace.com" in html:
-                return "Squarespace"
-
-            # Detect VBulletin
-            if "vbulletin" in html:
-                return "vBulletin"
-
-            # Detect Magento
-            if soup.find("meta", {"name": "generator", "content": "Magento"}):
-                return "Magento"
-
-            # Detect Shopify
-            if soup.find("meta", {"name": "generator", "content": "Shopify"}):
-                return "Shopify"
-
-            # Detect Blogger
-            if soup.find("meta", {"name": "generator", "content": "Blogger"}):
-                return "Blogger"
-
-            # Detect Ghost
-            if soup.find("meta", {"name": "generator", "content": "Ghost"}):
-                return "Ghost"
-
-            return "Unknown CMS"
-
+def get_url():
+    global url
+    while True:
+        url = input('Enter URL: ')
+        if not url:
+            print('Invalid URL')
+        elif not url.startswith('http'):
+            print('\033[31mInvalid URL\033[0m, Example: http://example.com')
+        elif url.endswith('/'):
+            url = url[:-1]
+            return url
         else:
-            return "Error: Unable to fetch URL"
+            return url
+
+
+def detect_cms(url, response):
+    if response.status_code == 200:
+        html = response.text
+        soup = BeautifulSoup(html, 'html.parser')
+
+        # Detect WordPress
+        if "wordpress" in html.lower():
+            return "WordPress"
+
+        # Detect Joomla
+        if soup.find("meta", {"name": "generator", "content": "Joomla! - Open Source Content Management"}):
+            return "Joomla"
+
+        # Detect Drupal
+        if soup.find("meta", {"name": "Generator", "content": "Drupal"}):
+            return "Drupal"
+
+        # Detect Wix
+        if "wix.com" in html:
+            return "Wix"
+
+        # Detect Squarespace
+        if "squarespace.com" in html:
+            return "Squarespace"
+
+        # Detect VBulletin
+        if "vbulletin" in html:
+            return "vBulletin"
+
+        # Detect Magento
+        if soup.find("meta", {"name": "generator", "content": "Magento"}):
+            return "Magento"
+
+        # Detect Shopify
+        if soup.find("meta", {"name": "generator", "content": "Shopify"}):
+            return "Shopify"
+
+        # Detect Blogger
+        if soup.find("meta", {"name": "generator", "content": "Blogger"}):
+            return "Blogger"
+
+        # Detect Ghost
+        if soup.find("meta", {"name": "generator", "content": "Ghost"}):
+            return "Ghost"
+
+        return "Unknown CMS"
+
+    else:
+        return "Error: Unable to fetch URL"
 
 
 def search_login_variations(cms_name, url):
@@ -299,134 +319,95 @@ def search_login_variations(cms_name, url):
 
     return valid_login_page
 
-
-def check_sql_injection_vulnerability(url):
-    # List of SQL injection payloads to test
-    payloads = [
-        "1' OR '1'='1",
-        "1' OR '1'='1' --",
-        "1' OR '1'='1' #",
-        "1' OR 1=1-- ",
-        "1' OR 1=1# ",
-        "' OR '1'='1",
-        "' OR '1'='1' --",
-        "' OR '1'='1' #",
-        "' OR 1=1-- ",
-        "' OR 1=1# ",
-        "') OR ('1'='1",
-        "') OR ('1'='1' --",
-        "') OR ('1'='1' #",
-        "') OR 1=1-- ",
-        "') OR 1=1# ",
-        "1' OR 1=1; DROP TABLE users;--",
-        "1' OR 1=1; DROP TABLE users;#",
-        "' OR '1'='1'; DROP TABLE users;--",
-        "' OR '1'='1'; DROP TABLE users;#",
-        # Add more payloads here
-    ]
-
-    vulnerable_parameters = []
-
+def get_ip(url):
     try:
-        response = requests.get(url)
+        parsed_url = urlparse(url)
+        domain = parsed_url.netloc
+        ip_address = socket.gethostbyname(domain)
+        return ip_address
+    except Exception as e:
+        print("Error:", e)
+        return "N/A"
+
+
+def get_server_info(res):
+    try:
+        response = res
+        end_time = time.time()
+        ip_address = get_ip(url)
         if response.status_code == 200:
-            html = response.text
+            # Load Time Calculation.
+            load_time = end_time - start_time
+            server_headers = response.headers
+            server = server_headers.get('Server', 'N/A')
+            os = server_headers.get('X-Powered-By', 'N/A')
 
-            # Use BeautifulSoup to parse the HTML and find input fields or query parameters
-            soup = BeautifulSoup(html, 'html.parser')
-            input_elements = soup.find_all("input")
-            query_parameters = ["example_param1", "example_param2"]  # Add actual query parameters here
+            print(f"\033[31mLoad Time:\033[0m {load_time:.1f} seconds")
+            print(f"\033[31mIP Address:\033[0m {ip_address}")
+            print(f"\033[31mServer Software:\033[0m {server}")
+            print(f"\033[31mServer OS:\033[0m {os}")
 
-            for param in query_parameters:
-                for payload in payloads:
-                    # Prepare the data with the payload for the parameter
-                    data = {param: payload}
-
-                    # Send the request
-                    response = requests.get(url, params=data)
-
-                    # Check if the response contains SQL error messages or other indications of vulnerability
-                    if "error" in response.text.lower():
-                        vulnerable_parameters.append(param)
-                        break  # No need to test other payloads for this parameter if vulnerability found
-
+        else:
+            print('Failed to fetch URL:', response.status_code)
     except requests.exceptions.RequestException as e:
         print("Error:", e)
 
-    return vulnerable_parameters
+def scan_port(ip, port):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(1)
+    result = sock.connect_ex((ip, port))
+    sock.close()
+    if result == 0:
+        return port
 
 
+def get_open_ports(ip_address):
+    print("\033[32mSearching for Open Ports\033[0m")
+
+    open_ports = []
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future_to_port = {executor.submit(scan_port, ip_address, port): port for port in range(1, 1024)}
+        for future in concurrent.futures.as_completed(future_to_port):
+            port = future_to_port[future]
+            if future.result() is not None:
+                open_ports.append(port)
+
+    return open_ports
 
 
-def detect_cms_button_click():
-    url = url_entry.get()
-    if not url:
-        messagebox.showerror("Error", "Please enter a valid URL.")
-        return
-
-    # Disable the detect button to prevent multiple clicks during processing
-    detect_button.config(state=tk.DISABLED)
-
-    # Set progress bar to 0% initially
-    progress_bar["value"] = 0
-
-    def search_cms_in_thread():
-        cms_name = detect_cms(url)
-        valid_login_page = search_login_variations(cms_name, url)
-        vulnerable_parameters = check_sql_injection_vulnerability(url)
-
-        result = f"The website is based on: {cms_name}\n"
-        if valid_login_page:
-            result += f"Login page found: {valid_login_page}\n"
-        if vulnerable_parameters:
-            result += f"Potential SQL injection vulnerability in parameters: {', '.join(vulnerable_parameters)}"
-        else:
-            result += "No SQL injection vulnerability detected."
-
-        # Update the result label with CMS and login variation information
-        result_label.config(text=result)
-
-        # Re-enable the detect button after processing is done
-        detect_button.config(state=tk.NORMAL)
-
-        # Set progress bar to 100% after processing is done
-        progress_bar["value"] = 100
-
-    # Create a thread for the CMS detection, login page search, and SQL injection check
-    thread = threading.Thread(target=search_cms_in_thread)
-    thread.start()
-
-
-# Create the main application window
-app = tk.Tk()
-app.title("CMS Detector")
-
-# Set the window size and position to center
-window_width = 500
-window_height = 250
-x_pos = (app.winfo_screenwidth() // 2) - (window_width // 2)
-y_pos = (app.winfo_screenheight() // 2) - (window_height // 2)
-app.geometry(f"{window_width}x{window_height}+{x_pos}+{y_pos}")
-
-# Create and place widgets
-url_label = ttk.Label(app, text="Enter URL:")
-url_label.pack()
-
-url_entry = ttk.Entry(app, width=50)
-url_entry.pack()
-
-detect_button = ttk.Button(app, text="Detect CMS", command=detect_cms_button_click)
-detect_button.pack()
-
-style = ttk.Style()
-style.theme_use("winnative")
-style.configure("winnative.Horizontal.TProgressbar", thickness=5)
-
-progress_bar = ttk.Progressbar(app, mode="determinate", style="winnative.Horizontal.TProgressbar")
-progress_bar.pack(pady=10)
-
-result_label = ttk.Label(app, text="", wraplength=400)
-result_label.pack()
-
-# Start the main event loop
-app.mainloop()
+if __name__ == '__main__':
+    logo = """
+   _____ _ _               _____ _               _             
+  / ____(_) |             / ____| |             | |            
+ | (___  _| |_ ___ ______| |    | |__   ___  ___| | _____ _ __ 
+  \___ \| | __/ _ \______| |    | '_ \ / _ \/ __| |/ / _ \ '__|
+  ____) | | ||  __/      | |____| | | |  __/ (__|   <  __/ |   
+ |_____/|_|\__\___|       \_____|_| |_|\___|\___|_|\_\___|_|   
+ © Tal.M
+"""
+    print(logo)
+    url = get_url()
+    print(f"Fetching URL...")
+    start_time = time.time()
+    response = requests.get(url)
+    get_server_info(response)
+    while True:
+        print("\n\033[31m1.CMS & Login Page Detection\033[0m")
+        print("\033[31m2.Port Scan\033[0m - Heavy Op")
+        print("\033[31m3.XSS Detection\033[0m")
+        print("\033[31m4.SQL Injection Detection\033[0m")
+        print("\033[31m5.Exit\033[0m\n")
+        user = input("\033[32mSelect Task:\033[0m\n")
+        if user == "1":
+            cms_name = detect_cms(url,response)
+            print(f"Detecting CMS...")
+            print(f" - {cms_name}")
+            print("Searching for login page...")
+            login_page = search_login_variations(cms_name, url)
+            print(" - "+login_page+"\n")
+        if user == "2":
+            open_ports = get_open_ports(get_ip(url))
+            if open_ports:
+                print("Open Ports:", open_ports)
+            else:
+                print("No open ports found.")
