@@ -1,4 +1,4 @@
-# Project Name
+# Site Scanner
 
 Site-Scanner makes it easy to perform basic security checks to ensure its safety. 
 
