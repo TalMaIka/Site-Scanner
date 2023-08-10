@@ -1,0 +1,56 @@
+{
+    "WordPress": {
+        "indicators": ["wordpress"]
+    },
+    "Prestashop": {
+        "indicators": ["prestashop"]
+    },
+    "Opencart": {
+        "indicators": ["opencart"]
+    },
+    "PhpMyAdmin": {
+        "indicators": ["phpmyadmin"]
+    },
+    "Cpanel": {
+        "indicators": ["cpanel"]
+    },
+    "Phpbb": {
+        "indicators": ["phpbb"]
+    },
+    "Invision Community": {
+        "indicators": ["powered by invision community"]
+    },
+    "Mybb": {
+        "indicators": ["mybb"]
+    },
+    "Joomla": {
+        "indicators": ["joomla"]
+    },
+    "Drupal": {
+        "indicators": ["drupal"]
+    },
+    "Wix": {
+        "indicators": ["wix.com"]
+    },
+    "Squarespace": {
+        "indicators": ["squarespace.com"]
+    },
+    "vBulletin": {
+        "indicators": ["vbulletin"]
+    },
+    "Magento": {
+        "indicators": ["magento"]
+    },
+    "Shopify": {
+        "indicators": ["shopify"]
+    },
+    "Blogger": {
+        "indicators": ["blogger"]
+    },
+    "Ghost": {
+        "indicators": ["ghost"]
+    },
+    "Unknown CMS": {
+        "indicators": ["unknown cms"]
+    }
+}
