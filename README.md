@@ -2,7 +2,7 @@
 
 Site-Scanner makes it easy to perform basic security checks to ensure its safety. 
 
-![Project Screenshot](Site-Checker-V1.gif)
+![Project Screenshot](Runtime.gif)
 
 ## Features
 
