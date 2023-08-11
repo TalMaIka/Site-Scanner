@@ -1,4 +1,4 @@
-# Site Scanner
+# ![icon](src/icons8-security-scan-45.png)Site Scanner
 
 Site-Scanner makes it easy to perform basic security checks to ensure its safety. 
 
