@@ -4,9 +4,9 @@ Site-Scanner makes it easy to perform security checks to ensure websites safety.
 
 ![Project Screenshot](Runtime.gif)
 
-## Features
-
 - **Ver 1.3:** Few CMS variations added, Robots.txt Lookup and automatic results saving.
+
+## Features
 
 - **Basic Info:** Quick site information (Load Time, IP Address, Server OS...).
 - **Robots.txt Lookup:** Looking for the Robots.txt in the default location and analysing it.
