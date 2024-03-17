@@ -2,6 +2,9 @@
     "WordPress": {
         "indicators": ["wordpress"]
     },
+    "vBulletin": {
+        "indicators": ["Powered by vBulletin"]
+    },
     "Prestashop": {
         "indicators": ["prestashop"]
     },
@@ -35,9 +38,6 @@
     "Squarespace": {
         "indicators": ["squarespace.com"]
     },
-    "vBulletin": {
-        "indicators": ["vbulletin"]
-    },
     "Magento": {
         "indicators": ["magento"]
     },
@@ -49,6 +49,9 @@
     },
     "Ghost": {
         "indicators": ["ghost"]
+    },
+    "TYP03 CMS": {
+        "indicators": ["TYPO3 CMS"]
     },
     "Unknown CMS": {
         "indicators": ["unknown cms"]

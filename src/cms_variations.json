@@ -16,6 +16,9 @@
         "/admin", "/admin/login", "/admin/signin", "/admin/login.php",
         "/admin/login.html", "/admin/log-in"
     ],
+    "typ03 cms": [
+        "/typo3/","/typo3_src/","/typo3conf/"
+    ],
     "shopify": [
         "/admin", "/admin/login", "/admin/signin", "/admin/login.php",
         "/admin/login.html", "/admin/log-in"
@@ -54,6 +57,7 @@
     ],
     "unknown cms": [
         "/adminarea",
+        "/typo3/",
             "/adminarea.php",
             "/adminarea.html",
             "/admin-login",

@@ -1,7 +1,7 @@
-# Site-Scanner - A tool to gather information about a website.
-# Author: Tal.M
-# Date: August 5, 2023
-# Copyright © 2023 Tal.M. All rights reserved.
+# Site-Scanner - Website vulnerability assessment tool.
+# Version: 1.3
+# Date: March 18, 2024
+# Copyright © Tal.M.
 
 import requests
 from bs4 import BeautifulSoup
@@ -13,6 +13,7 @@ import concurrent.futures
 import json
 from urllib.parse import urljoin
 import re
+from datetime import datetime
 
 
 def print_logo():
@@ -105,6 +106,12 @@ def get_server_info(res):
             print(f"\033[31mServer Software:\033[0m {server}")
             print(f"\033[31mServer OS:\033[0m {os}")
 
+            file_name.write('Sever Information:\n\n')
+            file_name.write(f"Load Time: {load_time:.1f} seconds\n")
+            file_name.write(f"IP Address: {ip_address}\n")
+            file_name.write(f"Server Software: {server}\n")
+            file_name.write(f"Server OS: {os}\n")
+
         else:
             print('Failed to fetch URL:', response.status_code)
     except requests.exceptions.RequestException as e:
@@ -151,14 +158,14 @@ def check_xss_vulnerability(url):
 
     soup = BeautifulSoup(response.text, 'html.parser')
 
-    # Method 1: Test input fields
+    # Testing input fields
     input_fields = soup.find_all('input')
-    found_vulnerabilities = False  # Flag to track if any vulnerabilities are found
+    found_vulnerabilities = False
 
     for field in input_fields:
         for payload in payloads:
             data = {field.get('name'): payload}
-            test_url = urljoin(url, field.get('action') or '')  # Handle relative URLs
+            test_url = urljoin(url, field.get('action') or '') 
             test_response = requests.post(test_url, data=data, headers=headers)
 
             if payload in test_response.text:
@@ -166,11 +173,14 @@ def check_xss_vulnerability(url):
                 print("Potential XSS vulnerability found in:", test_url)
                 print("Payload:", payload)
 
-    # Method 2: Test JavaScript event attributes
+                file_name.write("Potential XSS vulnerability found in:", test_url)
+                file_name.write("Payload:", payload)
+
+    # Testing JS event attributes
     script_tags = soup.find_all(string=re.compile(r'on\w+=".*?"'))
     for tag in script_tags:
         for payload in payloads:
-            test_url = urljoin(url, tag)  # Construct a URL with the payload as the event attribute value
+            test_url = urljoin(url, tag)
             test_response = requests.get(test_url, headers=headers)
 
             if payload in test_response.text:
@@ -178,7 +188,10 @@ def check_xss_vulnerability(url):
                 print("Potential XSS vulnerability found in:", test_url)
                 print("Payload:", payload)
 
-    # Method 3: Test URLs with query parameters
+                file_name.write("Potential XSS vulnerability found in:", test_url)
+                file_name.write("Payload:", payload)
+
+    # Testing URL parameters
     for payload in payloads:
         test_url = url + "?" + payload
         test_response = requests.get(test_url, headers=headers)
@@ -188,9 +201,15 @@ def check_xss_vulnerability(url):
             print("Potential XSS vulnerability found in:", test_url)
             print("Payload:", payload)
 
+            file_name.write("Potential XSS vulnerability found in:", test_url)
+            file_name.write("Payload:", payload)
+
     # No vulnerabilities found
     if not found_vulnerabilities:
         print("No XSS Vulnerabilities found.")
+
+        file_name.write("No XSS Vulnerabilities found.")
+
 
 
 def is_valid_url(url):
@@ -263,28 +282,63 @@ def check_sql_injection_vulnerability(url):
                 print("SQL injection vulnerability found in:", test_url)
                 print("Payload:", payload)
 
-                # Printing the actual error message.
+                file_name.write("SQL injection vulnerability found in:", test_url)
+                file_name.write("Payload:", payload)
+
+                # Printing the error message.
                 soup = BeautifulSoup(response.text, 'html.parser')
                 error_tag = soup.find(string=lambda text: "error" in text.lower() or "syntax error" in text.lower())
                 if error_tag:
                     error_message = error_tag.strip()
                     print("Error message:", error_message)
-                return  # Remove this line if you want to continue checking other payloads
+
+                    file_name.write("Error message:", error_message)
+                return 
+
+
+def file_output():
+    parsed_url = urlparse(url)
+    domain_name = parsed_url.netloc.split('www.')[-1]
+    timestamp = datetime.now().strftime("%y.%m.%d %H:%M:%S")
+    file_name = f"{domain_name}_{timestamp}.txt"
+    file_object = open(file_name, 'a')
+    return file_object
+
+def show_robots_txt(url):
+    try:
+        parsed_url = urlparse(url)
+        robots_url = f"{parsed_url.scheme}://{parsed_url.netloc}/robots.txt"
+        response = requests.get(robots_url)
+        if response.status_code == 200:
+            print("\nRobots.txt:")
+            print(response.text)
+            file_name.write('\n\nRobots.txt:\n')
+            file_name.write(response.text)
+            file_name.write("Hello")
+        else:
+            print("Failed to fetch robots.txt. Status Code:", response.status_code)
+    except Exception as e:
+        print("Error:", e)
+
+
 
 
 if __name__ == '__main__':
     print_logo()
-    url = get_url()
+    url = get_url() 
+    file_name = file_output()
+
     print("Fetching URL...")
     start_time = time.time()
     response = requests.get(url)
     get_server_info(response)
     while True:
         print("\n\033[31m1.CMS & Login Page Detection\033[0m")
-        print("\033[31m2.Port Scan\033[0m - Heavy Op")
-        print("\033[31m3.XSS Detection\033[0m")
-        print("\033[31m4.SQL Injection Detection\033[0m")
-        print("\033[31m5.Exit\033[0m")
+        print("\033[31m2.Robots.txt Lookup\033[0m")
+        print("\033[31m3.Port Scan\033[0m - Heavy Op")
+        print("\033[31m4.XSS Detection\033[0m")
+        print("\033[31m5.SQL Injection Detection\033[0m")
+        print("\033[31m6.Exit\033[0m")
         user = input("\033[32mSelect Task:\033[0m")
 
         # Switch case tasks
@@ -293,22 +347,45 @@ if __name__ == '__main__':
             print(f"\nDetecting CMS...")
             print(f" - {cms_name}")
             print("Searching for login page...")
+            
+            file_name.write(f"\nDetecting CMS...")
+            file_name.write(f" - {cms_name}\n")
+            file_name.write("Searching for login page...\n")
             login_page = search_login_variations(cms_name, url)
-            print(" - " + login_page)
+            if login_page:
+                print(" - " + login_page)
+                file_name.write(" - " + login_page)
+            else:
+                print(" - Login page not found")
+                file_name.write(" - Login page not found\n")
+
+            
+            
         if user == "2":
+            print("\nFetching robots.txt...")
+
+            file_name.write("\nFetching robots.txt...")
+            show_robots_txt(url)
+        if user == "3":
             print("\nSearching for Open Ports...")
+            file_name.write("\nSearching for Open Ports...")
             open_ports = get_open_ports(get_ip(url))
             if open_ports:
                 print("Open Ports:", open_ports)
+                file_name.write("\nOpen Ports:", open_ports)
             else:
                 print("No open ports found.")
-        if user == "3":
-            print("\nLooking for XSS Vulnerabilities...")
-            check_xss_vulnerability(url)
+                file_name.write("\nNo open ports found.")
         if user == "4":
-            print("\nLooking for SQL Injection Vulnerabilities...")
-            check_sql_injection_vulnerability(url)
+            print("\nLooking for XSS Vulnerabilities...")
+            file_name.write("\nLooking for XSS Vulnerabilities...")
+            check_xss_vulnerability(url)
         if user == "5":
+            print("\nLooking for SQL Injection Vulnerabilities...")
+            file_name.write("\nLooking for SQL Injection Vulnerabilities...")
+            check_sql_injection_vulnerability(url)
+        if user == "6":
             print("\nShutting down...")
+            file_name.write("\nShutting down...")
             time.sleep(1)
             exit(1)
