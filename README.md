@@ -39,3 +39,4 @@ Site-Scanner makes it easy to perform security checks to ensure websites safety.
 ## Contributing
 
 Found a bug or want to contribute? Great! Please submit an issue or pull request.
+<img src="https://t.bkit.co/w_65faf700d7342.gif" />
