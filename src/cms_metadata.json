@@ -3,7 +3,7 @@
         "indicators": ["wordpress"]
     },
     "vBulletin": {
-        "indicators": ["Powered by vBulletin"]
+        "indicators": ["vBulletin"]
     },
     "Prestashop": {
         "indicators": ["prestashop"]

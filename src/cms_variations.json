@@ -22,6 +22,9 @@
     "shopify": [
         "/admin", "/admin/login", "/admin/signin", "/admin/login.php",
         "/admin/login.html", "/admin/log-in"
+    ],"vbulletin": [
+        "/admincp", "/admincp/index.php", "/admincp/login.php",
+      "/admincp/login.html", "/admincp/login"
     ],
     "prestashop": [
         "/admin", "/admin-dev", "/backend", "/signin", "/login",
@@ -57,7 +60,6 @@
     ],
     "unknown cms": [
         "/adminarea",
-        "/typo3/",
             "/adminarea.php",
             "/adminarea.html",
             "/admin-login",
