@@ -14,7 +14,13 @@ import json
 from urllib.parse import urljoin
 import re
 from datetime import datetime
+import signal
+import sys
 
+def signal_handler(sig, frame):
+    print("\nShutting down...")
+    time.sleep(1)
+    exit(1)
 
 def print_logo():
     with open("src/logo.txt", "r") as logo_file:
@@ -373,6 +379,7 @@ if __name__ == '__main__':
     cms_name = detect_cms(url, response)
 
     while True:
+        signal.signal(signal.SIGINT, signal_handler)
         print_menu()
         user = input("\033[32mSelect Task:\033[0m")
         # Switch case tasks
