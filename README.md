@@ -2,13 +2,16 @@
 
 Site-Scanner makes it easy to perform security checks to ensure websites safety. 
 
+![Site-Scanner](Ver.1.5.png)
+
 - **Ver 1.5:** Few CMS variations added, Robots.txt Lookup and automatic results saving.
 
 ## Features
 
 - **Basic Info:** Quick site information (Load Time, IP Address, Server OS...).
-- **Robots.txt Lookup:** Looking for the Robots.txt in the default location and analysing it.
+- **Robots.txt Disallow Entries:** Detection of Robots.txt and printing Disallow Entries.
 - **CMS Detection:** Automatically identifies the CMS used by a website (WordPress, Joomla, Drupal, etc.).
+- **Vulnerability Report:** According to the indentified CMS will generate vulnerability report.
 - **Login Page Search:** Searches for common login page variations based on the detected CMS.
 - **SQL Injection Check:** Tests for SQL injection vulnerabilities in query parameters.
 - **XSS Detection:** Tests for SQL injection vulnerabilities in query parameters.
@@ -38,4 +41,3 @@ Site-Scanner makes it easy to perform security checks to ensure websites safety.
 ## Contributing
 
 Found a bug or want to contribute? Great! Please submit an issue or pull request.
-<img src="https://i.imgur.com/X0o5wuc.png" title="source: imgur.com" />
