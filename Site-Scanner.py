@@ -1,6 +1,6 @@
 # Site-Scanner - Website vulnerability assessment tool.
-# Version: 1.3
-# Date: March 18, 2024
+# Version: 1.5
+# Date: March 21, 2024
 # Copyright © Tal.M.
 
 import requests
@@ -55,8 +55,6 @@ def detect_cms(url, response):
         for cms, metadata in cms_metadata.items():
             for indicator in metadata["indicators"]:
                 if indicator.lower() in html.lower():
-                    global version
-                    version = extract_cms_version(html, cms)
                     return cms
 
         return "Unknown CMS"
@@ -76,14 +74,11 @@ def extract_cms_version(html, cms):
         version_match = re.search(r'<meta name="generator" content="Joomla! - Open Source Content Management - Version ([\d.]+)">', html)
         if version_match:
             return version_match.group(1)
-    # Add more CMS versions extraction logic as needed
     return None
 
 def find_wp_config_backup(base_url):
     try:
-        # Construct the URL to access the wp-config.php.bak file
         wp_config_backup_url = urljoin(base_url, "/wp-config.php-bak")
-        print(wp_config_backup_url)
 
         # Fetch the content of the wp-config.php.bak file
         response = requests.get(wp_config_backup_url)
@@ -106,8 +101,8 @@ def find_wp_config_backup(base_url):
     except requests.RequestException as e:
         print(f"Error fetching URL {wp_config_backup_url}: {e}")
 
-def search_vulnerabilities(cms, version):
-    if version:  # Check if version is not None or empty
+def search_vulnerabilities(cms, version,url):
+    if version:
         major_minor_version = ".".join(version.split(".")[:2])
         search_query = f"{cms}+{major_minor_version}"
     else:
@@ -118,6 +113,9 @@ def search_vulnerabilities(cms, version):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
     }
+
+    if cms_name=="WordPress":
+                find_wp_config_backup(url)
     
     try:
         response = requests.get(search_url, headers=headers)
@@ -128,15 +126,12 @@ def search_vulnerabilities(cms, version):
         
         if cve_info:
             cve_count = cve_info.find("b").text.strip()
-            return f"\033[31m{cve_count}\033[0m CVE Records found for {cms} {major_minor_version}\nSee more at {search_url}"
+            return f"\n\033[31m{cve_count}\033[0m CVE Records found for {cms} {major_minor_version}\nSee more at {search_url}"
         else:
-            return f"No CVE Records found for {cms} {major_minor_version}."
+            return f"\nNo CVE Records found for {cms} {major_minor_version}."
         
     except requests.RequestException as e:
         return f"Error: {str(e)}"
-
-
-
 
 def search_login_variations(cms_name, url):
     with open("src/cms_variations.json", "r") as variations_file:
@@ -153,7 +148,6 @@ def search_login_variations(cms_name, url):
 
     return valid_login_page
 
-
 def get_ip(url):
     try:
         parsed_url = urlparse(url)
@@ -163,7 +157,6 @@ def get_ip(url):
     except Exception as e:
         print("Error:", e)
         return "N/A"
-
 
 def get_server_info(res):
     try:
@@ -188,7 +181,6 @@ def get_server_info(res):
     except requests.exceptions.RequestException as e:
         print("Error:", e)
 
-
 def scan_port(ip, port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(1)
@@ -196,7 +188,6 @@ def scan_port(ip, port):
     sock.close()
     if result == 0:
         return port
-
 
 def get_open_ports(ip_address):
 
@@ -209,8 +200,6 @@ def get_open_ports(ip_address):
                 open_ports.append(port)
 
     return open_ports
-
-
 
 def check_xss_vulnerability(url):
     payloads = [
@@ -270,8 +259,6 @@ def check_xss_vulnerability(url):
     if not found_vulnerabilities:
         print("No XSS Vulnerabilities found.")
 
-
-
 def is_valid_url(url):
     response = requests.head(url)
     return response.status_code == 200
@@ -291,9 +278,6 @@ def generate_test_urls(domain, patterns_file):
         test_urls.append(full_url)
 
     return test_urls
-
-
-
 
 def check_sql_injection_vulnerability(url):
     payloads = [
@@ -338,7 +322,7 @@ def check_sql_injection_vulnerability(url):
             full_url = f"{test_url}{payload}" if '?' in test_url else f"{test_url}?param={payload}"
             response = requests.get(full_url, headers=headers)
 
-            if "error" in response.text.lower() or "syntax error" in response.text.lower():
+            if "error" in response.text.lower() and response.status_code == 200 or "syntax error" in response.text.lower():
                 print("SQL injection vulnerability found in:", test_url)
                 print("Payload:", payload)
 
@@ -362,12 +346,12 @@ def show_robots_txt(url):
                 if line.strip().startswith('Disallow:'):
                     print(line.strip())
         else:
-            print("Failed to fetch robots.txt. Status Code:", response.status_code)
+            print("\nFailed to fetch robots.txt. Status Code:", response.status_code)
     except Exception as e:
         print("Error:", e)
 
 def print_menu():
-    print("\n\033[31m1.CMS Detection & CVE Report\033[0m")
+    print("\n\033[31m1.CMS Detection & Vulnerability Report\033[0m")
     print("\033[31m2.Admin Panel Auth Detection\033[0m")
     print("\033[31m3.Robots.txt Disallow Entries\033[0m")
     print("\033[31m4.Open Ports Scan\033[0m - Heavy Op")
@@ -375,87 +359,6 @@ def print_menu():
     print("\033[31m6.SQL Injection Detection\033[0m")
     print("\033[31m0.Exit\033[0m")
 
-
-def find_sensitive_data(base_url):
-    try:
-        # Fetch the homepage of the WordPress website
-        response = requests.get(base_url)
-        if response.status_code != 200:
-            print(f"Failed to fetch homepage of {base_url}. Status Code: {response.status_code}")
-            return
-
-        # Parse the HTML content
-        soup = BeautifulSoup(response.text, 'html.parser')
-
-        # Find posts or pages containing custom fields
-        custom_fields = soup.find_all(attrs={"class": "entry-content"})  # Example selector, adjust as needed
-
-        for field in custom_fields:
-            # Extract the URL of the post or page
-            post_url = field.find_previous("a")['href']  # Example selector, adjust as needed
-            # Construct the URL to access the post or page directly
-            post_direct_url = urljoin(base_url, post_url)
-
-            # Fetch the content of the post or page
-            post_response = requests.get(post_direct_url)
-            if post_response.status_code != 200:
-                print(f"Failed to fetch post or page {post_direct_url}. Status Code: {post_response.status_code}")
-                continue
-
-            # Parse the HTML content of the post or page
-            post_soup = BeautifulSoup(post_response.text, 'html.parser')
-
-            # Additional manipulation techniques to uncover sensitive data
-            # Technique 1: Accessing WordPress config backups
-            if "?file=wp-config.php.bak" in post_direct_url:
-                # Parse the response to extract sensitive information from the backup wp-config.php file
-                wp_config_backup_content = post_response.text
-                # Look for database credentials, authentication keys, or other sensitive data
-                if "define('DB_PASSWORD'" in wp_config_backup_content:
-                    print(f"Database password found in backup wp-config.php: {post_direct_url}")
-
-            # Technique 2: Exploiting XML-RPC vulnerabilities
-            if "xmlrpc.php" in post_direct_url:
-                # Attempt to exploit XML-RPC vulnerabilities to retrieve sensitive data
-                # For example, use the pingback.ping method to enumerate internal paths or files
-                pingback_payload = """
-                <?xml version="1.0"?>
-                <methodCall>
-                  <methodName>pingback.ping</methodName>
-                  <params>
-                    <param>
-                      <value>
-                        <string>https://example.com/</string>
-                      </value>
-                    </param>
-                    <param>
-                      <value>
-                        <string>https://example.com/wp-admin/index.php</string>
-                      </value>
-                    </param>
-                  </params>
-                </methodCall>
-                """
-                pingback_response = requests.post(post_direct_url, data=pingback_payload)
-                # Analyze the response for potential sensitive information
-                if pingback_response.status_code == 200:
-                    pingback_response_content = pingback_response.text
-                    # Look for internal paths or files that may reveal sensitive information
-
-            # Add more manipulation techniques as needed...
-
-    except requests.RequestException as e:
-        print(f"Error fetching URL {base_url}: {e}")
-        
-        print("\nSecurity Headers:")
-        for header, value in security_headers.items():
-            if value:
-                print(f"{header}: {value}")
-            else:
-                print(f"{header} is missing or not properly configured!")
-    
-    except requests.RequestException as e:
-        print("Error:", e)
 
 
 
@@ -476,13 +379,12 @@ if __name__ == '__main__':
         if user == "1":
             print(f"\nDetecting CMS...")
             print(f" - {cms_name}")
-            if version:
+            version = extract_cms_version(response.text, cms_name)
+            if version is not None:
                 print("Version: "+version)
-            print("\nSearching vunls")
-            vulnerabilities = search_vulnerabilities(cms_name, version)
-            print(vulnerabilities)
-            if cms_name=="WordPress":
-                find_wp_config_backup(url)
+            if cms_name != "Unkown CMS":
+                print("\nSearching Vulnerabilities")
+                print(search_vulnerabilities(cms_name, version, url))
             
         if user == "2":
             print("\nSearching for login page...")
