@@ -1,6 +1,6 @@
 # ![icon](src/icons8-security-scan-45.png)Site Scanner
 
-Site-Scanner makes it easy to perform security checks to ensure websites safety. 
+Site-Scanner - Web application vulnerability assessment tool.
 
 ![Site-Scanner](Ver.1.5.png)
 
