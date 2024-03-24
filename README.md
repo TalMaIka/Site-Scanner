@@ -5,6 +5,7 @@ Site-Scanner - Web application vulnerability assessment tool.
 ![Site-Scanner](Ver.1.5.png)
 
 - **Ver 1.5:** Few CMS variations added, Robots.txt disallow entries printing and Vulnerability report.
+- **Ver 1.6:** Running time was reduced when preforming heavy tasks and community bug fixed.
 
 ## Features
 
