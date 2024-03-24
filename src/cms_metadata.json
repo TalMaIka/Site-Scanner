@@ -1,59 +1,432 @@
 {
     "WordPress": {
-        "indicators": ["wordpress"]
+        "identification": {
+            "indicators": ["WordPress"]
+        },
+        "version_detection": {
+            "indicators": [
+                "<meta name=\"generator\" content=\"WordPress ([\\d.]+)\" />",
+                "<meta name=\"generator\" content=\"WordPress ([\\d.]+)\"",
+                "<link rel=\"https://api\\.w\\.org/\" href=\"https://wordpress\\.org/\" /><meta property=\"og:site_name\" content=\"WordPress ([\\d.]+)\" />"
+            ]
+        },
+        "login_pages": [
+            "/wp-login.php",
+            "/wp-admin",
+            "/admin",
+            "/login",
+            "/wp/wp-login.php",
+            "/wp-admin.php",
+            "/shop/login",
+            "/woocommerce/login",
+            "/administrator"
+        ]
     },
     "vBulletin": {
-        "indicators": ["vBulletin"]
+        "identification": {
+            "indicators": ["vBulletin"]
+        },
+        "version_detection": {
+            "indicators": [
+                "<meta name=\"generator\" content=\"vBulletin ([\\d.]+)\" />"
+            ]
+        },
+        "login_pages": [
+            "/admincp", "/admincp/index.php", "/admincp/login.php",
+      "/admincp/login.html", "/admincp/login"
+        ]
     },
     "Prestashop": {
-        "indicators": ["prestashop"]
+        "identification": {
+            "indicators": ["prestashop"]
+        },
+        "version_detection": {
+            "indicators": [
+                "<meta name=\"generator\" content=\"PrestaShop ([\\d.]+)\" />",
+                "<meta name=\"generator\" content=\"PrestaShop ([\\d.]+)\"",
+                "<meta name=\"generator\" content=\"PrestaShop([\\d.]+)\"",
+                "<meta name=\"generator\" content=\"PrestaShop ([\\d.]+) -",
+                "<meta name=\"generator\" content=\"Powered by PrestaShop ([\\d.]+)\""
+            ]
+        },
+        "login_pages": [
+            "/admin",
+            "/admin-dev",
+            "/backend",
+            "/signin",
+            "/login",
+            "/prestashop/admin",
+            "/prestashop/login",
+            "/admin123",
+            "/admin/login",
+            "/admin/index.php",
+            "/admin/login.php"
+        ]
     },
     "Opencart": {
-        "indicators": ["opencart"]
+        "identification": {
+            "indicators": ["opencart"]
+        },
+        "version_detection": {
+            "indicators": [
+                "<meta name=\"generator\" content=\"OpenCart ([\\d.]+)\" />"
+            ]
+        },
+        "login_pages": [
+            "/admin",
+            "/admin/login.php",
+            "/admin/index.php"
+        ]
     },
     "PhpMyAdmin": {
-        "indicators": ["phpmyadmin"]
+        "identification": {
+            "indicators": ["phpmyadmin"]
+        },
+        "login_pages": [
+            "/phpmyadmin",
+            "/phpmyadmin/index.php",
+            "/phpmyadmin/login.php",
+            "/phpmyadmin/login.html"
+        ]
     },
     "Cpanel": {
-        "indicators": ["cpanel"]
+        "identification": {
+            "indicators": ["cpanel"]
+        },
+        "login_pages": [
+            "/cpanel",
+            "/cpanel/login.php"
+        ]
     },
     "Phpbb": {
-        "indicators": ["phpbb"]
+        "identification": {
+            "indicators": ["phpbb"]
+        },
+        "login_pages": [
+            "/forum/ucp.php?mode=login",
+            "/forum/ucp.php?mode=login&sid=",
+            "/forum/ucp.php?mode=login&sid="
+        ]
     },
     "Invision Community": {
-        "indicators": ["powered by invision community"]
+        "identification": {
+            "indicators": ["powered by invision community"]
+        },
+        "login_pages": [
+            "/forum/index.php?app=core&module=global&section=login"
+        ]
     },
     "Mybb": {
-        "indicators": ["mybb"]
+        "identification": {
+            "indicators": ["mybb"]
+        },
+        "login_pages": [
+            "/forum/member.php?action=login"
+        ]
     },
     "Joomla": {
-        "indicators": ["joomla"]
+        "identification": {
+            "indicators": ["joomla"]
+        },
+        "version_detection": {
+            "indicators": [
+                "<meta name=\"generator\" content=\"Joomla! ([\\d.]+)\" />"
+            ]
+        },
+        "login_pages": [
+            "/administrator",
+            "/administrator/index.php",
+            "/administrator/login.php",
+            "/admin/login.php",
+            "/admin/index.php",
+            "/admin",
+            "/admin/login",
+            "/user",
+            "/login"
+        ]
     },
     "Drupal": {
-        "indicators": ["drupal"]
+        "identification": {
+            "indicators": ["drupal"]
+        },
+        "version_detection": {
+            "indicators": [
+                "<meta name=\"generator\" content=\"Drupal ([\\d.]+)\" />"
+            ]
+        },
+        "login_pages": [
+            "/user",
+            "/user/login",
+            "/user/login.php",
+            "/user/login.html",
+            "/user/login.jsp",
+            "/user/login.aspx",
+            "/user/login.cgi",
+            "/user/login.pl",
+            "/user/login.asp",
+            "/user/login.jsf",
+            "/user/login.xhtml",
+            "/user/login.ashx"
+        ]
     },
     "Wix": {
-        "indicators": ["wix.com"]
+        "identification": {
+            "indicators": ["wix.com"]
+        },
+        "login_pages": [
+            "/_login",
+            "/signin",
+            "/signin/"
+        ]
     },
     "Squarespace": {
-        "indicators": ["squarespace.com"]
+        "identification": {
+            "indicators": ["squarespace.com"]
+        },
+        "login_pages": [
+            "/account/login",
+            "/account/signin",
+            "/login",
+            "/sign-in"
+        ]
     },
     "Magento": {
-        "indicators": ["magento"]
+        "identification": {
+            "indicators": ["magento"]
+        },
+        "login_pages": [
+            "/admin",
+            "/admin/login",
+            "/admin/index",
+            "/admin/login",
+            "/admin/index",
+            "/admin/login/index",
+            "/admin/dashboard",
+            "/backend",
+            "/admin/backend",
+            "/admin/dashboard",
+            "/admin/signin",
+            "/admin/signin/index",
+            "/admin/signin/login",
+            "/admin/signin/login/index",
+            "/admin/signin/index/index"
+        ]
     },
     "Shopify": {
-        "indicators": ["shopify"]
+        "identification": {
+            "indicators": ["shopify"]
+        },
+        "login_pages": [
+            "/admin",
+            "/admin/auth/login",
+            "/admin/auth/login/index",
+            "/admin/auth/signin",
+            "/admin/auth/signin/index",
+            "/admin/auth/signin/login",
+            "/admin/auth/signin/login/index",
+            "/admin/auth/signin/index/index"
+        ]
     },
     "Blogger": {
-        "indicators": ["blogger"]
+        "identification": {
+            "indicators": ["blogger"]
+        },
+        "login_pages": [
+            "/login",
+            "/admin",
+            "/dashboard",
+            "/admin/index.php",
+            "/admin/login.php"
+        ]
     },
     "Ghost": {
-        "indicators": ["ghost"]
+        "identification": {
+            "indicators": ["ghost"]
+        },
+        "login_pages": [
+            "/ghost",
+            "/ghost/login",
+            "/ghost/signin",
+            "/signin",
+            "/login",
+            "/admin"
+        ]
     },
     "TYP03 CMS": {
-        "indicators": ["TYPO3 CMS"]
+        "identification": {
+            "indicators": ["TYPO3 CMS"]
+        },
+        "login_pages": [
+            "/typo3",
+            "/typo3/index.php",
+            "/typo3/index"
+        ]
     },
     "Unknown CMS": {
-        "indicators": ["unknown cms"]
+        "login_pages": [
+            "/admin",
+            "/adminarea",
+            "/adminarea.php",
+            "/adminarea.html",
+            "/admin-login",
+            "/wp-login.php",
+            "/admin-login.php",
+            "/admin-login.html",
+            "/admin1",
+            "/admin.php",
+            "/adminlogin",
+            "/admin1.php",
+            "/admin1.html",
+            "/admin2",
+            "/admin2.php",
+            "/admin2.html",
+            "/yonetim",
+            "/yonetim.php",
+            "/yonetim.html",
+            "/yonetici",
+            "/yonetici.php",
+            "/yonetici.html",
+            "/ccms",
+            "/ccms.php",
+            "/ccms.html",
+            "/panel",
+            "/panel.php",
+            "/panel.html",
+            "/controlpanel",
+            "/controlpanel.php",
+            "/controlpanel.html",
+            "/admincontrol",
+            "/admincontrol.php",
+            "/admincontrol.html",
+            "/admin1.asp",
+            "/admin2.asp",
+            "/yonetim.asp",
+            "/yonetici.asp",
+            "/ccms.asp",
+            "/panel.asp",
+            "/controlpanel.asp",
+            "/admincontrol.asp",
+            "/admin/account",
+            "/admin/account.php",
+            "/admin/account.html",
+            "/admin/admin",
+            "/admin/admin.php",
+            "/admin/admin.html",
+            "/admin-login.asp",
+            "/admin1/login",
+            "/admin2/login",
+            "/yonetim/login",
+            "/yonetici/login",
+            "/ccms/login",
+            "/panel/login",
+            "/controlpanel/login",
+            "/admincontrol/login",
+            "/admin/account/login",
+            "/admin1/login.asp",
+            "/admin2/login.asp",
+            "/yonetim/login.asp",
+            "/yonetici/login.asp",
+            "/ccms/login.asp",
+            "/panel/login.asp",
+            "/controlpanel/login.asp",
+            "/admincontrol/login.asp",
+            "/admin/account/login.asp",
+            "/admin-login/login",
+            "/admin/admin-login",
+            "/admin-login/admin",
+            "/admin-login/login.asp",
+            "/admin1/login",
+            "/admin2/login",
+            "/yonetim/login",
+            "/yonetici/login",
+            "/ccms/login",
+            "/panel/login",
+            "/controlpanel/login",
+            "/admincontrol/login",
+            "/admin/account/login",
+            "/login.php",
+            "/login.html",
+            "/signin.php",
+            "/signin.html",
+            "/log-in.php",
+            "/log-in.html",
+            "/userlogin",
+            "/userlogin.php",
+            "/userlogin.html",
+            "/administratorlogin",
+            "/administratorlogin.php",
+            "/administratorlogin.html",
+            "/adminlogin",
+            "/adminlogin.php",
+            "/adminlogin.html",
+            "/secureadmin",
+            "/secureadmin.php",
+            "/secureadmin.html",
+            "/webmaster",
+            "/webmaster.php",
+            "/webmaster.html",
+            "/sysadmin",
+            "/sysadmin.php",
+            "/sysadmin.html",
+            "/systemadmin",
+            "/systemadmin.php",
+            "/systemadmin.html",
+            "/manager",
+            "/manager.php",
+            "/manager.html",
+            "/moderator",
+            "/moderator.php",
+            "/moderator.html",
+            "/webadmin",
+            "/webadmin.php",
+            "/webadmin.html",
+            "/siteadmin",
+            "/siteadmin.php",
+            "/siteadmin.html",
+            "/login-admin",
+            "/login-admin.php",
+            "/login-admin.html",
+            "/admin1/login",
+            "/admin1/login.php",
+            "/admin1/login.html",
+            "/admin2/login",
+            "/admin2/login.php",
+            "/admin2/login.html",
+            "/admins.php",
+            "/admins.html",
+            "/admins/login.php",
+            "/admins/login.html",
+            "/admins/signin.php",
+            "/admins/signin.html",
+            "/admins/log-in.php",
+            "/admins/log-in.html",
+            "/administrator1.php",
+            "/administrator1.html",
+            "/administrator1/login.php",
+            "/administrator1/login.html",
+            "/administrator1/signin.php",
+            "/administrator1/signin.html",
+            "/administrator1/log-in.php",
+            "/administrator1/log-in.html",
+            "/administrator2.php",
+            "/administrator2.html",
+            "/administrator2/login.php",
+            "/administrator2/login.html",
+            "/administrator2/signin.php",
+            "/administrator2/signin.html",
+            "/administrator2/log-in.php",
+            "/administrator2/log-in.html",
+            "/login-admin1",
+            "/login-admin1.php",
+            "/login-admin1.html",
+            "/login-admin2",
+            "/login-admin2.php",
+            "/login-admin2.html",
+            "/admin_login.php",
+            "/admin_login.html",
+            "/admin_login/login.php",
+            "/admin_login/login.html",
+            "/admin_login/sign"
+        ]
     }
 }

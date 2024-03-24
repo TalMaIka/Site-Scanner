@@ -3,19 +3,12 @@
 # Date: March 21, 2024
 # Copyright © Tal.M.
 
-import requests
+import requests, time, requests,socket, concurrent.futures
+import json, re, signal, sys
 from bs4 import BeautifulSoup
-import time
-import requests
 from urllib.parse import urlparse
-import socket
-import concurrent.futures
-import json
 from urllib.parse import urljoin
-import re
 from datetime import datetime
-import signal
-import sys
 
 def signal_handler(sig, frame):
     print("\nShutting down...")
@@ -32,16 +25,12 @@ def get_url():
     while True:
         try:
             url = input('\nEnter URL: ')
-
-            if not url:
-                print('Invalid URL')
-            elif not url.startswith('http'):
+            if not url.startswith('http') or not url:
                 print('\033[31mInvalid URL\033[0m, Example: http://example.com')
             elif url.endswith('/'):
                 url = url[:-1]
                 return url
-            else:
-                return url
+            
         except KeyboardInterrupt:
             print("\n\nShutting down...")
             time.sleep(1)
@@ -49,38 +38,37 @@ def get_url():
         except Exception as e:
             print('An error occurred:', e)
 
+def load_cms_metadata(json_file):
+    with open(json_file, "r") as file:
+        return json.load(file)
 
-def detect_cms(url, response):
+def detect_cms_and_version(url, cms_metadata):
+    response = requests.get(url)
     if response.status_code == 200:
-        html = response.text
-        soup = BeautifulSoup(html, 'html.parser')
-
-        with open("src/cms_metadata.json", "r") as metadata_file:
-            cms_metadata = json.load(metadata_file)
+        html_content = response.text
+        detected_cms = "Unknown CMS"
+        detected_version = None
 
         for cms, metadata in cms_metadata.items():
-            for indicator in metadata["indicators"]:
-                if indicator.lower() in html.lower():
-                    return cms
+            for indicator in metadata.get("identification", {}).get("indicators", []):
+                if re.search(indicator, html_content, re.I):
+                    detected_cms = cms
+                    break
 
-        return "Unknown CMS"
+            if detected_cms:
+                for version_indicator in metadata.get("version_detection", {}).get("indicators", []):
+                    version_match = re.search(version_indicator, html_content)
+                    if version_match:
+                        detected_version = version_match.group(1)
+                        break
+
+                if detected_version:
+                    break
+
+        return detected_cms, detected_version
     else:
-        return "Error: Unable to fetch URL"
-
-def extract_cms_version(html, cms):
-    if cms.lower() == "vbulletin":
-        version_match = re.search(r'<meta name="generator" content="vBulletin ([\d.]+)"', html)
-        if version_match:
-            return version_match.group(1)
-    if cms.lower() == "wordpress":
-        version_match = re.search(r'<meta name="generator" content="WordPress ([\d.]+)" />', html)
-        if version_match:
-            return version_match.group(1)
-    if cms.lower() == "joomla":
-        version_match = re.search(r'<meta name="generator" content="Joomla! - Open Source Content Management - Version ([\d.]+)">', html)
-        if version_match:
-            return version_match.group(1)
-    return None
+        print(f"Error: Unable to fetch URL: {url}")
+        return None, None
 
 def find_wp_config_backup(base_url):
     try:
@@ -90,7 +78,7 @@ def find_wp_config_backup(base_url):
         response = requests.get(wp_config_backup_url)
         if response.status_code == 200:
             
-            print("\n\033[31mMajor Leak Found!\033[0m\n")
+            print("\n\033[31m[+] Major Leak Found!\033[0m\n")
             # Extract database configuration information
             wp_config_content = response.text
             db_name = wp_config_content.split("DB_NAME', '")[1].split("'")[0]
@@ -139,20 +127,22 @@ def search_vulnerabilities(cms, version,url):
     except requests.RequestException as e:
         return f"Error: {str(e)}"
 
-def search_login_variations(cms_name, url):
-    with open("src/cms_variations.json", "r") as variations_file:
-        cms_variations = json.load(variations_file)
+def search_login_variations(cms_name, url, cms_metadata):
+    cms_info = cms_metadata.get(cms_name, {})  # Use the original CMS name without lowercasing
 
-    variations = cms_variations.get(cms_name.lower(), [])
+    login_pages = cms_info.get("login_pages", [])
 
     valid_login_page = None
-    for variation in variations:
-        response = requests.get(f"{url}{variation}")
+    for page in login_pages:
+        response = requests.get(f"{url}{page}")
         if response.status_code == 200:
-            valid_login_page = f"{url}{variation}"
+            valid_login_page = f"{url}{page}"
             break
+    if valid_login_page:
+        print("\n[-] " + valid_login_page)
+    else:
+        print("\n[-] Login page not found")
 
-    return valid_login_page
 
 def get_ip(url):
     try:
@@ -285,9 +275,8 @@ def generate_test_urls(domain, patterns_file):
 
     return test_urls
 
-def check_sql_injection_vulnerability(url):
+def sql_injection_vulnerability(url):
     payloads = [
-
         "'"
         "1' OR '1'='1",
         "1' OR '1'='1' --",
@@ -341,13 +330,13 @@ def check_sql_injection_vulnerability(url):
                 return 
 
 
-def show_robots_txt(url):
+def robots_txt(url):
     try:
         parsed_url = urlparse(url)
         robots_url = f"{parsed_url.scheme}://{parsed_url.netloc}/robots.txt"
         response = requests.get(robots_url)
         if response.status_code == 200:
-            print("\nFetching robots.txt...\n")
+            print("\n[+] Fetching robots.txt...\n")
             for line in response.text.split('\n'):
                 if line.strip().startswith('Disallow:'):
                     print(line.strip())
@@ -372,11 +361,14 @@ if __name__ == '__main__':
     print_logo()
     url = get_url() 
 
-    print("Fetching URL...")
+    print("\nFetching URL...")
     start_time = time.time()
     response = requests.get(url)
     get_server_info(response)
-    cms_name = detect_cms(url, response)
+    # Reducing load by importing files in the main stack.
+    cms_metadata = load_cms_metadata("src/cms_metadata.json")
+    #Init value if CMS Detection skipped.
+    cms_name = "Unknown CMS"
 
     while True:
         signal.signal(signal.SIGINT, signal_handler)
@@ -384,28 +376,24 @@ if __name__ == '__main__':
         user = input("\033[32mSelect Task:\033[0m")
         # Switch case tasks
         if user == "1":
-            print(f"\nDetecting CMS...")
-            print(f" - {cms_name}")
-            version = extract_cms_version(response.text, cms_name)
-            if version is not None:
-                print("Version: "+version)
-            if cms_name != "Unkown CMS":
-                print("\nSearching Vulnerabilities")
-                print(search_vulnerabilities(cms_name, version, url))
+            print(f"\n[+] Detecting CMS...")
+            cms_name, cms_version = detect_cms_and_version(url, cms_metadata)
+            print("\nDetected CMS:", cms_name)
+            if cms_version != None:
+                print("Detected Version:", cms_version)    
+            if cms_name != "Unknown CMS":
+                print("\n[+] Searching Vulnerabilities")
+                print(search_vulnerabilities(cms_name, cms_version, url))
             
         if user == "2":
-            print("\nSearching for login page...")
-            login_page = search_login_variations(cms_name, url)
-            if login_page:
-                print(" - " + login_page)
-            else:
-                print(" - Login page not found")
+            print("\n[+] Detecting Admin Panel Auth...")
+            search_login_variations(cms_name, url,cms_metadata)
 
         if user == "3":
-            show_robots_txt(url)
+            robots_txt(url)
 
         if user == "4":
-            print("\nSearching for Open Ports...")
+            print("\n[+] Scanning For Open Ports...")
             open_ports = get_open_ports(get_ip(url))
             if open_ports:
                 print("Open Ports:", open_ports)
@@ -413,12 +401,12 @@ if __name__ == '__main__':
                 print("No open ports found.")
 
         if user == "5":
-            print("\nLooking for XSS Vulnerabilities...")
+            print("\n[+] Looking for XSS Vulnerabilities...")
             check_xss_vulnerability(url)
 
         if user == "6":
-            print("\nLooking for SQL Injection Vulnerabilities...")
-            check_sql_injection_vulnerability(url)
+            print("\n[+] Looking for SQL Injection Vulnerabilities...")
+            sql_injection_vulnerability(url)
 
         if user == "0":
             print("\nShutting down...")
