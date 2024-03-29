@@ -1,7 +1,7 @@
 # Site-Scanner - Website vulnerability assessment tool.
-# Version: 1.5
+# Version: 1.7.5
 # Date: March 21, 2024
-# Copyright © Tal.M.
+# Cr © Tal.M.
 
 import requests, time, requests,socket, concurrent.futures
 import json, re, signal, sys
@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 from urllib.parse import urljoin
 from datetime import datetime
+from urllib.parse import urlparse
 
 def signal_handler(sig, frame):
     print("\nShutting down...")
@@ -24,19 +25,22 @@ def print_logo():
 def get_url():
     while True:
         try:
-            url = input('\nEnter URL: ')
-            if not url.startswith('http') or not url:
-                print('\033[31mInvalid URL\033[0m, Example: http://example.com')
-            elif url.endswith('/'):
-                url = url[:-1]
-                return url
-            
+            url = input('\nEnter URL: ').strip()  # Remove leading/trailing whitespace
+            if not url:
+                print('\033[31mError:\033[0m URL cannot be empty.')
+                continue
+            if not url.startswith(('http://', 'https://')):
+                print('\033[31mError:\033[0m URL must start with http:// or https://')
+                continue
+            if url.endswith('/'):
+                url = url[:-1]  # Remove trailing slash
+            return url
         except KeyboardInterrupt:
             print("\n\nShutting down...")
             time.sleep(1)
             exit(0)
         except Exception as e:
-            print('An error occurred:', e)
+            print('\033[31mAn error occurred:\033[0m', e)
 
 def load_cms_metadata(json_file):
     with open(json_file, "r") as file:
@@ -345,16 +349,55 @@ def robots_txt(url):
     except Exception as e:
         print("Error:", e)
 
+
+def refactor_url(url):
+    parsed_url = urlparse(url)
+    base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+    if url == base_url:
+        return url
+    print(f"Specefied URL: {url}\n")
+    print(f"1. Stripped URL: {base_url}")
+    print("2. Enter new URL")
+    print(f"3. Continue with: {url}")
+    user = input("\nEnter your selection: ")
+    if user == '1':
+        url = base_url
+    if user == '2':
+        url = get_url()
+    return url
+
+def check_directory(url, directory):
+    full_url = url.rstrip('/') + '/' + directory
+    try:
+        response = requests.get(full_url, timeout=5)
+        if response.status_code in [200, 204, 301, 302, 307, 401]:
+            return (full_url, response.status_code)
+    except requests.exceptions.RequestException:
+        pass
+
+def search_directories(url, wordlist_path):
+    with open(wordlist_path, 'r') as f:
+        directories = f.read().splitlines()
+
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        future_to_directory = {executor.submit(check_directory, url, directory): directory for directory in directories}
+        for future in concurrent.futures.as_completed(future_to_directory):
+            result = future.result()
+            if result:
+                print(f"[+] {result[0]} (Status: {result[1]})")
+
+    return
+
 def print_menu():
     print("\n\033[31m1.CMS Detection & Vulnerability Report\033[0m")
     print("\033[31m2.Admin Panel Auth Detection\033[0m")
     print("\033[31m3.Robots.txt Disallow Entries\033[0m")
-    print("\033[31m4.Open Ports Scan\033[0m - Heavy Op")
-    print("\033[31m5.XSS Detection\033[0m")
-    print("\033[31m6.SQL Injection Detection\033[0m")
+    print("\033[31m4.Scanning Directories\033[0m")
+    print("\033[31m5.Open Ports Scan\033[0m - Heavy Op")
+    print("\033[31m6.XSS Detection\033[0m")
+    print("\033[31m7.SQL Injection Detection\033[0m")
     print("\033[31m0.Exit\033[0m")
-
-
 
 
 if __name__ == '__main__':
@@ -391,20 +434,26 @@ if __name__ == '__main__':
 
         if user == "3":
             robots_txt(url)
-
+            
         if user == "4":
-            print("\n[+] Scanning For Open Ports...")
-            open_ports = get_open_ports(get_ip(url))
-            if open_ports:
-                print("Open Ports:", open_ports)
-            else:
-                print("No open ports found.")
-
+            print("\n[+] Scanning Directories...\n")
+            wordlist_path = "src/dir.txt"
+            url = refactor_url(url)
+            # Extract base URL up to the domain suffix
+            search_directories(url, wordlist_path)
+            
         if user == "5":
+            print("\n[+] Scanning Subdomains...\n")
+            wordlist_path = "src/sub.txt"
+            url = refactor_url(url)
+            # Extract base URL up to the domain suffix
+            search_directories(url, wordlist_path)
+
+        if user == "6":
             print("\n[+] Looking for XSS Vulnerabilities...")
             check_xss_vulnerability(url)
 
-        if user == "6":
+        if user == "7":
             print("\n[+] Looking for SQL Injection Vulnerabilities...")
             sql_injection_vulnerability(url)
 
