@@ -2,10 +2,12 @@
 
 Site-Scanner - Web application vulnerability assessment tool.
 
-![Site-Scanner](Ver.1.5.png)
+![Site-Scanner](Ver.1.7.5.png)
 
 - **Ver 1.5:** Few CMS variations added, Robots.txt disallow entries printing and Vulnerability report.
 - **Ver 1.6:** Running time was reduced when preforming heavy tasks and community bug fixed.
+- **Ver 1.7.5:** Directory Scanning feature added and URL pasing bug fixed.
+
 
 ## Features
 
@@ -14,6 +16,7 @@ Site-Scanner - Web application vulnerability assessment tool.
 - **CMS Detection:** Automatically identifies the CMS used by a website (WordPress, Joomla, Drupal, etc.).
 - **Vulnerability Report:** According to the indentified CMS will generate vulnerability report.
 - **Login Page Search:** Searches for common login page variations based on the detected CMS.
+- **Directory Scanning:** Searches for valid directories under the specified URL.
 - **SQL Injection Check:** Tests for SQL injection vulnerabilities in query parameters.
 - **XSS Detection:** Tests for SQL injection vulnerabilities in query parameters.
 - **User-Friendly Interface:** Interactive and detailed shell menu.
