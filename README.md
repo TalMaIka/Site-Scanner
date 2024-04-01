@@ -27,7 +27,7 @@ Site-Scanner - Web application vulnerability assessment tool.
 
 ### Prerequisites
 
-- Python 3.x
+- Python 3.x.x
 - Required Python packages: `requests`, `beautifulsoup4`
 
 ### Installation
