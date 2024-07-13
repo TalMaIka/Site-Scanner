@@ -1,15 +1,13 @@
-# Site-Scanner - Website vulnerability assessment tool.
-# Version: 1.7.5
-# Date: March 21, 2024
-# Cr © Tal.M.
+# Site-Scanner - Website Vulnerability Assessment Tool.
+# Version: 1.8.0
+# Date: Jul 13, 2024
+# Copyrights © Tal.M
 
-import requests, time, requests,socket, concurrent.futures
-import json, re, signal, sys
+import requests, time,socket,concurrent.futures
+import json, re, signal, sys, ssl
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse
-from urllib.parse import urljoin
-from datetime import datetime
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin
+import datetime
 
 def signal_handler(sig, frame):
     print("\nShutting down...")
@@ -50,29 +48,31 @@ def detect_cms_and_version(url, cms_metadata):
     response = requests.get(url)
     if response.status_code == 200:
         html_content = response.text
-        detected_cms = "Unknown CMS"
-        detected_version = None
-
+        detected_cms, detected_version = "Unknown CMS", None
+        
         for cms, metadata in cms_metadata.items():
-            for indicator in metadata.get("identification", {}).get("indicators", []):
+            indicators = metadata.get("identification", {}).get("indicators", [])
+            version_indicators = metadata.get("version_detection", {}).get("indicators", [])
+            
+            for indicator in indicators:
                 if re.search(indicator, html_content, re.I):
                     detected_cms = cms
                     break
-
-            if detected_cms:
-                for version_indicator in metadata.get("version_detection", {}).get("indicators", []):
-                    version_match = re.search(version_indicator, html_content)
-                    if version_match:
-                        detected_version = version_match.group(1)
-                        break
-
-                if detected_version:
+            
+            for version_indicator in version_indicators:
+                version_match = re.search(version_indicator, html_content)
+                if version_match:
+                    detected_version = version_match.group(1)
                     break
+
+            if detected_cms and detected_version:
+                break
 
         return detected_cms, detected_version
     else:
         print(f"Error: Unable to fetch URL: {url}")
         return None, None
+
 
 def find_wp_config_backup(base_url):
     try:
@@ -98,6 +98,8 @@ def find_wp_config_backup(base_url):
             
     except requests.RequestException as e:
         print(f"Error fetching URL {wp_config_backup_url}: {e}")
+
+    
 
 def search_vulnerabilities(cms, version,url):
     if version:
@@ -192,7 +194,7 @@ def scan_port(ip, port):
 def get_open_ports(ip_address):
 
     open_ports = []
-    with concurrent.futures.ThreadPoolExecutor() as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
         future_to_port = {executor.submit(scan_port, ip_address, port): port for port in range(1, 1024)}
         for future in concurrent.futures.as_completed(future_to_port):
             port = future_to_port[future]
@@ -380,7 +382,7 @@ def search_directories(url, wordlist_path):
         directories = f.read().splitlines()
 
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         future_to_directory = {executor.submit(check_directory, url, directory): directory for directory in directories}
         for future in concurrent.futures.as_completed(future_to_directory):
             result = future.result()
@@ -389,14 +391,105 @@ def search_directories(url, wordlist_path):
 
     return
 
+def check_security_headers(url):
+    headers_to_check = [
+    "Content-Security-Policy",
+    "X-Content-Type-Options",
+    "X-Frame-Options",
+    "Strict-Transport-Security",
+    "X-XSS-Protection",
+    "Referrer-Policy",
+    "Feature-Policy",
+    "Expect-CT",
+    "Content-Encoding",
+    "Permissions-Policy",
+    "Cache-Control"
+    ]   
+    
+    response = requests.get(url)
+    missing_headers = []
+
+    for header in headers_to_check:
+        if header not in response.headers:
+            missing_headers.append(f"[+] {header}")
+    
+    if missing_headers:
+        missing_headers_str = '\n'.join(missing_headers)
+        print(f"Missing security headers for {url}:\n{missing_headers_str}")
+    else:
+        print(f"All security headers are present for {url}")
+
+def check_subdomain(scheme, base_url, subdomain):
+    full_url = f"{scheme}://{subdomain}.{base_url}"
+    try:
+        response = requests.get(full_url, timeout=5)
+        if response.status_code == 200:
+            return full_url, response.status_code
+    except requests.RequestException:
+        return None
+
+def search_subdomains(url, wordlist_path):
+    parsed_url = urlparse(url)
+    scheme = parsed_url.scheme
+    base_url = parsed_url.netloc
+
+    with open(wordlist_path, 'r') as f:
+        subdomains = f.read().splitlines()
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+        future_to_subdomain = {executor.submit(check_subdomain, scheme, base_url, subdomain): subdomain for subdomain in subdomains}
+        for future in concurrent.futures.as_completed(future_to_subdomain):
+            result = future.result()
+            if result:
+                print(f"[+] {result[0]} (Status: {result[1]})")
+
+
+def check_ssl_certificate(url):
+    if url.startswith("https://"):
+        url = url.replace("https://", "")
+    else:
+        print("URL must start with https://")
+        return
+    try:
+        context = ssl.create_default_context()
+        with context.wrap_socket(socket.socket(), server_hostname=url) as sock:
+            sock.settimeout(5)  # Adjust timeout as needed
+            sock.connect((url, 443))  # Connect to the website's HTTPS port
+            ssl_info = sock.getpeercert()
+
+            # Extract relevant certificate information
+            issuer_info = ssl_info['issuer']
+            country = issuer_info[0][0][1] if len(issuer_info[0]) > 0 else 'N/A'
+            organization = issuer_info[1][0][1] if len(issuer_info[1]) > 0 else 'N/A'
+            common_name = issuer_info[2][0][1] if len(issuer_info[2]) > 0 else 'N/A'
+            expiration_date = datetime.datetime.strptime(ssl_info['notAfter'], "%b %d %H:%M:%S %Y %Z")
+
+            # Check validity and expiration
+            current_date = datetime.datetime.now()
+            days_until_expire = (expiration_date - current_date).days
+
+            # Print SSL/TLS Certificate Information
+            print(f"[+] Issuer: Country:{country}, Org:{organization}, Name:{common_name}")
+            print(f"[+] Expiration Date: {expiration_date.strftime('%Y-%m-%d')}")
+            print(f"[+] Days until Expiry: {days_until_expire}")
+
+    except ssl.SSLError as e:
+        print(f"\nError checking SSL/TLS certificate for {url}: {str(e)}")
+    except Exception as e:
+        print(f"\nError: {str(e)}")
+
+
 def print_menu():
     print("\n\033[31m1.CMS Detection & Vulnerability Report\033[0m")
     print("\033[31m2.Admin Panel Auth Detection\033[0m")
-    print("\033[31m3.Robots.txt Disallow Entries\033[0m")
-    print("\033[31m4.Scanning Directories\033[0m")
-    print("\033[31m5.Open Ports Scan\033[0m - Heavy Op")
-    print("\033[31m6.XSS Detection\033[0m")
-    print("\033[31m7.SQL Injection Detection\033[0m")
+    print("\033[31m3.Robots.txt Disallowed\033[0m")
+    print("\033[31m4.Check Security Headers\033[0m")
+    print("\033[31m5.Validate SSL Certificate\033[0m")
+    print("\033[31m6.Open Ports Scan\033[0m - Heavy Op")
+    print("\033[31m7.Scanning Directories\033[0m")
+    print("\033[31m8.Scanning Subdomains\033[0m")
+    print("\033[31m9.SQL Injection Detection\033[0m")
+    print("\033[31m10.XSS Detection\033[0m")
     print("\033[31m0.Exit\033[0m")
 
 
@@ -408,8 +501,10 @@ if __name__ == '__main__':
     start_time = time.time()
     response = requests.get(url)
     get_server_info(response)
+
     # Reducing load by importing files in the main stack.
     cms_metadata = load_cms_metadata("src/cms_metadata.json")
+
     #Init value if CMS Detection skipped.
     cms_name = "Unknown CMS"
 
@@ -434,28 +529,41 @@ if __name__ == '__main__':
 
         if user == "3":
             robots_txt(url)
-            
+    
         if user == "4":
+            print("\n[+] Checking Security Headers...\n")
+            check_security_headers(url)
+
+        if user == "5":
+            print(url)
+            print("\n[+] Checking SSL Certificate...\n")
+            check_ssl_certificate(url)
+
+        if user == "6":
+            print("\n[+] Scanning Ports...\n")
+            print(get_open_ports(get_ip(url)))
+            
+        if user == "7":
             print("\n[+] Scanning Directories...\n")
             wordlist_path = "src/dir.txt"
             url = refactor_url(url)
             # Extract base URL up to the domain suffix
             search_directories(url, wordlist_path)
-            
-        if user == "5":
+        
+        if user == "8":
             print("\n[+] Scanning Subdomains...\n")
             wordlist_path = "src/sub.txt"
             url = refactor_url(url)
             # Extract base URL up to the domain suffix
-            search_directories(url, wordlist_path)
+            search_subdomains(url, wordlist_path)
 
-        if user == "6":
-            print("\n[+] Looking for XSS Vulnerabilities...")
-            check_xss_vulnerability(url)
-
-        if user == "7":
+        if user == "9":
             print("\n[+] Looking for SQL Injection Vulnerabilities...")
             sql_injection_vulnerability(url)
+
+        if user == "10":
+            print("\n[+] Looking for XSS Vulnerabilities...")
+            check_xss_vulnerability(url)
 
         if user == "0":
             print("\nShutting down...")

@@ -1,21 +1,24 @@
 <p align="center"><a href="https://github.com/TalMaIka/Site-Scanner"><img src="src/barcode.png" alt="Site-Scanner icon" height="60"/></a></p>
 <h1 align="center">Site-Scanner</h1>
-<p align="center">Web application vulnerability assessment tool.</p>
+<p align="center">Web Application Vulnerability Assessment Tool.</p>
 
 
-<p align="center"><a href="https://github.com/TalMaIka/Site-Scanner"><img src="Ver1.7.5.png" alt="Site-Scanner icon" height="380"/></a></p>
+<p align="center"><a href="https://github.com/TalMaIka/Site-Scanner"><img src="src/Ver-1.8.0.png" alt="Site-Scanner icon" height="380"/></a></p>
 
 
 ## :dart: Features
 
 - **Basic Info:** Quick site information (Load Time, IP Address, Server OS...).
 - **Robots.txt Disallow Entries:** Detection of Robots.txt and printing Disallow Entries.
-- **CMS Detection:** Automatically identifies the CMS used by a website (WordPress, Joomla, Drupal, etc.).
-- **Vulnerability Report:** According to the indentified CMS will generate vulnerability report.
-- **Login Page Search:** Searches for common login page variations based on the detected CMS.
+- **CMS Detection & Vulnerability Report:** Automatically identifies the CMS and generates a vulnerability report.
+- **Admin Panel Auth Detection:** Searches for common login page variations based on the detected CMS.
 - **Directory Scanning:** Searches for valid directories under the specified URL.
-- **SQL Injection Check:** Tests for SQL injection vulnerabilities in query parameters.
-- **XSS Detection:** Tests for SQL injection vulnerabilities in query parameters.
+- **Security Headers Check:** Checks for the presence of important security headers.
+- **SSL Certificate Validation:** Validates the SSL/TLS certificate for the domain, displaying issuer information, expiration date, and days until expiry.
+- **Open Ports Scan:** Scans open ports on the server.
+- **Subdomain Scanning:** Scans for subdomains of the specified URL.
+- **SQL Injection Detection:** Tests for SQL injection vulnerabilities in query parameters.
+- **XSS Detection:** Tests for cross-site scripting vulnerabilities.
 - **User-Friendly Interface:** Interactive and detailed shell menu.
 - **Multi-Threaded:** Efficiently performs tasks in the background using threading.
 
@@ -36,8 +39,8 @@
 ## :rocket: Usage
 
 1. Run the tool: `python3 Site-Scanner.py` / Proxychains `proxychains python3 Site-Scanner.py`
-2. Enter the URL of the website you want to analyze.
-3. Choose your tasks according to the menu.
+2. Enter the URL of the website you wish to analyze.
+3. Choose tasks according to the menu.
 
 ## :copyright: Contributing
 
