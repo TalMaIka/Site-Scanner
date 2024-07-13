@@ -1,15 +1,12 @@
-# ![icon](src/icons8-security-scan-45.png)Site Scanner
-
-Site-Scanner - Web application vulnerability assessment tool.
-
-![Site-Scanner](Ver1.7.5.png)
-
-- **Ver 1.5:** Few CMS variations added, Robots.txt disallow entries printing and Vulnerability report.
-- **Ver 1.6:** Running time was reduced when preforming heavy tasks and community bug fixed.
-- **Ver 1.7.5:** Directory Scanning feature added and URL pasing bug fixed.
+<p align="center"><a href="https://github.com/TalMaIka/Site-Scanner"><img src="src/barcode.png" alt="Site-Scanner icon" height="60"/></a></p>
+<h1 align="center">Site-Scanner</h1>
+<p align="center">Web application vulnerability assessment tool.</p>
 
 
-## Features
+<p align="center"><a href="https://github.com/TalMaIka/Site-Scanner"><img src="Ver1.7.5.png" alt="Site-Scanner icon" height="400"/></a></p>
+
+
+## :dart: Features
 
 - **Basic Info:** Quick site information (Load Time, IP Address, Server OS...).
 - **Robots.txt Disallow Entries:** Detection of Robots.txt and printing Disallow Entries.
@@ -23,7 +20,7 @@ Site-Scanner - Web application vulnerability assessment tool.
 - **Multi-Threaded:** Efficiently performs tasks in the background using threading.
 
 
-## Getting Started
+## :zap: Getting Started
 
 ### Prerequisites
 
@@ -36,12 +33,12 @@ Site-Scanner - Web application vulnerability assessment tool.
 2. Navigate to the project directory: `cd Site-Scanner`
 3. Requirements Installation: `pip install -r requirements.txt`
 
-## Usage
+## :rocket: Usage
 
 1. Run the tool: `python3 Site-Scanner.py` / Proxychains `proxychains python3 Site-Scanner.py`
 2. Enter the URL of the website you want to analyze.
 3. Choose your tasks according to the menu.
 
-## Contributing
+## :copyright: Contributing
 
 Found a bug or want to contribute? Great! Please submit an issue or pull request.
