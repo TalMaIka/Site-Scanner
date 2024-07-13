@@ -3,7 +3,7 @@
 <p align="center">Web Application Vulnerability Assessment Tool.</p>
 
 
-<p align="center"><a href="https://github.com/TalMaIka/Site-Scanner"><img src="src/Ver-1.8.0.png" alt="Site-Scanner icon" height="380"/></a></p>
+<p align="center"><a href="https://github.com/TalMaIka/Site-Scanner"><img src="src/Ver-1.8.0.png" alt="Site-Scanner icon" height="550"/></a></p>
 
 
 ## :dart: Features
