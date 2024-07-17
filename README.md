@@ -1,6 +1,7 @@
-<p align="center"><a href="https://github.com/TalMaIka/Site-Scanner"><img src="src/barcode.png" alt="Site-Scanner icon" height="60"/></a></p>
+
 <h1 align="center">Site-Scanner</h1>
-<p align="center">Web Application Vulnerability Assessment Tool.</p>
+<p align="center"><a href="https://github.com/TalMaIka/Site-Scanner"><img src="https://i.imgur.com/kGdjdOR.png" alt="Site-Scanner banner"/></a></p>
+
 
 
 <p align="center"><a href="https://github.com/TalMaIka/Site-Scanner"><img src="src/Ver-1.8.0.png" alt="Site-Scanner icon" height="550"/></a></p>
