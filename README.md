@@ -1,6 +1,6 @@
 
 <h1 align="center">Site-Scanner</h1>
-<h1 align="center"><a href="https://github.com/TalMaIka/Site-Scanner"><img src="https://i.imgur.com/kGdjdOR.png" alt="Site-Scanner banner"/></a></h1>
+<h1 align="center"><a href="https://github.com/TalMaIka/Site-Scanner"><img src="https://i.imgur.com/mRqfubx.png" alt="Site-Scanner banner"/></a></h1>
 <p align="center"></p>
 
 
