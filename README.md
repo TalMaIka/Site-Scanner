@@ -1,11 +1,16 @@
 
 <h1 align="center">Site-Scanner</h1>
-<h1 align="center"><a href="https://github.com/TalMaIka/Site-Scanner"><img src="https://i.imgur.com/mRqfubx.png" alt="Site-Scanner banner"/></a></h1>
 <p align="center"></p>
-
-
-
 <p align="center"><a href="https://github.com/TalMaIka/Site-Scanner"><img src="src/Ver-1.8.0.png" alt="Site-Scanner icon" height="450"/></a></p>
+<p align="center">
+
+[![Number of GitHub stars](https://img.shields.io/github/stars/TalMaIka/Site-Scanner)](https://github.com/TalMaIka/Site-Scanner)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/TalMaIka/Site-Scanner)
+![Number of GitHub closed issues](https://img.shields.io/github/issues-closed/TalMaIka/Site-Scanner)
+    
+</p>
+
+
 
 
 ## :dart: Features
